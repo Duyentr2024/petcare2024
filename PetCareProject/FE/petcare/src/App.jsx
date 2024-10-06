@@ -17,7 +17,7 @@ import ProtectedRoute from "./service/ProtectedRoute";
 function App() {
   const userRole = localStorage.getItem("userRole");
   const currentPath = window.location.pathname;
-  console.log(userRole);
+  // console.log(userRole);
   if (currentPath === "/admin") {
     if (userRole === "Admin") {
       return <Admin />;

@@ -36,6 +36,8 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
   };
 

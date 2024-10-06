@@ -15,4 +15,8 @@ public class CartDetail {
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "productDetailsId")
+    private ProductDetail productDetail;
 }

@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     @Autowired
@@ -45,12 +46,14 @@ public class AuthController {
     public Map<String, Object> login(@RequestParam String email, @RequestParam String password,
                                      HttpSession session, HttpServletResponse response) {
         User user = userService.findByEmail(email);
+//        User userId = userService.findByUserId(user.getUserId());
         if (user == null || !passwordEncoderService.matches(password, user.getPassword())) {
             return Map.of("message", "Thông tin đăng nhập không chính xác!", "status", false);
         }
 
         // Lưu thông tin người dùng vào session
         session.setAttribute("loggedInUser", user);
+//        session.setAttribute("userId", userId);
 
         // Tạo cookie để lưu trữ session ID
         Cookie cookie = new Cookie("SESSIONID", session.getId());
@@ -60,17 +63,18 @@ public class AuthController {
 
         // Trả về thông tin người dùng và quyền của họ
         String role = userService.getUserRole(user);
-        return Map.of("message", "Đăng nhập thành công!", "status", true, "user", user.getEmail(), "role", role);
+        String userId = userService.getUserId(user);
+        return Map.of("message", "Đăng nhập thành công!", "status", true, "user", user.getEmail(), "role", role, "userId", userId);
     }
 
     // Đăng xuất
-    @PostMapping("/logout")
-    public String logout(HttpSession session, HttpServletResponse response) {
-        session.invalidate(); // Hủy session
-        Cookie cookie = new Cookie("SESSIONID", null); // Xóa cookie
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-        return "Đăng xuất thành công!";
-    }
+//    @PostMapping("/logout")
+//    public String logout(HttpSession session, HttpServletResponse response) {
+//        session.invalidate(); // Hủy session
+//        Cookie cookie = new Cookie("SESSIONID", null); // Xóa cookie
+//        cookie.setMaxAge(0);
+//        cookie.setPath("/");
+//        response.addCookie(cookie);
+//        return "Đăng xuất thành công!";
+//    }
 }

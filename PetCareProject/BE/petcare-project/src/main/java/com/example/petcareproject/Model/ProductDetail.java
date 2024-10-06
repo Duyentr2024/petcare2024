@@ -16,8 +16,4 @@ public class ProductDetail {
     @ManyToOne
     @JoinColumn(name = "productId")
     private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "cartDetailId")
-    private CartDetail cartDetail;
 }

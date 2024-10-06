@@ -21,12 +21,21 @@ public class UserService {
 
     public User findByEmail(String email) {return userRepository.findByEmail(email);}
 
+    public User findByUserId(Long id) {return userRepository.findByUserId(id);}
 
     public void assignRoleToUser(User user, Role role) {
         UserRole userRole = new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
         userRoleRepository.save(userRole);
+    }
+
+    public String getUserId(User user) {
+        return user.getUserId().toString();
+    }
+
+    public String getUserById(Long userId) {
+        return userRepository.findByUserId(userId).getEmail();
     }
 
     public String getUserRole(User user) {

@@ -15,28 +15,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors() // Bật CORS
+                .cors() // Enable CORS
                 .and()
+                .csrf().disable() // Optionally disable CSRF if not needed
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/auth/register",
-                                "/api/auth/login",
-                                "/api/brands/**",
+                                "/api/auth/login"
+                        ).permitAll() // Allow access to these endpoints without authentication
+                        .requestMatchers("/api/brands/**",
                                 "/api/products/**",
                                 "/api/product-details/**",
-                                "/api/product-categories/**",
-                                "/css/**",
-                                "/js/**",
-                                "/"
-                        ).permitAll() // Cho phép truy cập các endpoint này
-                        .anyRequest().authenticated() // Yêu cầu xác thực cho các request khác
+                                "/api/product-categories/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
                         .permitAll()
-                )
-                .csrf().disable(); // Tùy chọn tắt CSRF nếu không cần thiết
+                );
 
         return http.build();
     }

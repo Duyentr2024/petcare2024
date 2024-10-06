@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import ProductDetailService from "../../service/ProductDetailService";
 import ProductService from "../../service/ProductService";
+import { FaEdit, FaTrash } from 'react-icons/fa'; // Import icons
 
 const ProductDetailManager = () => {
   const [productDetails, setProductDetails] = useState([]);
-  const [product, setProduct] = useState([]); // Changed products to product
+  const [product, setProduct] = useState([]);
   const [formData, setFormData] = useState({ productId: "", quantity: 0, price: 0 });
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -13,7 +14,7 @@ const ProductDetailManager = () => {
 
   useEffect(() => {
     loadProductDetails();
-    loadProduct(); // Changed loadProducts to loadProduct
+    loadProduct();
   }, []);
 
   const loadProductDetails = async () => {
@@ -22,7 +23,7 @@ const ProductDetailManager = () => {
     try {
       const response = await ProductDetailService.getAllProductDetails();
       console.log("Fetched Product Details:", response);
-      setProductDetails(response); // Ensure response is structured correctly
+      setProductDetails(response);
     } catch (error) {
       console.error("Error loading product details", error);
       setErrorMessage("Không thể tải thông tin chi tiết sản phẩm.");
@@ -31,12 +32,12 @@ const ProductDetailManager = () => {
     }
   };
 
-  const loadProduct = async () => { // Changed function name
+  const loadProduct = async () => {
     setErrorMessage("");
     try {
       const response = await ProductService.getAllProducts();
-      console.log("Fetched Products:", response); // Log response
-      setProduct(response.data); // Ensure response.data contains the product list
+      console.log("Fetched Products:", response);
+      setProduct(response.data);
     } catch (error) {
       console.error("Error loading products", error);
       setErrorMessage("Không thể tải danh sách sản phẩm.");
@@ -62,7 +63,7 @@ const ProductDetailManager = () => {
         setEditMode(false);
       } else {
         await ProductDetailService.createProductDetail({
-          product: { productId: formData.productId }, // Ensure productId is included
+          product: { productId: formData.productId },
           quantity: formData.quantity,
           price: formData.price,
         });
@@ -91,11 +92,11 @@ const ProductDetailManager = () => {
 
   const handleEdit = (detail) => {
     setFormData({
-      productId: detail.product.productId || "", // Ensure productId is defined
-      quantity: detail.quantity || 0, // Ensure quantity is defined
-      price: detail.price || 0, // Ensure price is defined
+      productId: detail.product.productId || "",
+      quantity: detail.quantity || 0,
+      price: detail.price || 0,
     });
-    setEditId(detail.productDetailId); // Set the editId to the selected productDetailId
+    setEditId(detail.productDetailId);
     setEditMode(true);
   };
 
@@ -111,18 +112,18 @@ const ProductDetailManager = () => {
       
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mb-6 space-y-4 p-4 border border-gray-300 rounded-lg shadow-md bg-gray-50">
         <div>
           <label className="block text-sm font-medium">Product</label>
           <select
             name="productId"
             value={formData.productId}
             onChange={handleInputChange}
-            className="block w-full mt-1 p-2 border rounded"
+            className="block w-full mt-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
             <option value="">Select a product</option>
-            {product.map((prod) => ( // Changed products to product
+            {product.map((prod) => (
               <option key={prod.productId} value={prod.productId}>
                 {prod.productName}
               </option>
@@ -137,7 +138,7 @@ const ProductDetailManager = () => {
             name="quantity"
             value={formData.quantity}
             onChange={handleInputChange}
-            className="block w-full mt-1 p-2 border rounded"
+            className="block w-full mt-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -149,7 +150,7 @@ const ProductDetailManager = () => {
             name="price"
             value={formData.price}
             onChange={handleInputChange}
-            className="block w-full mt-1 p-2 border rounded"
+            className="block w-full mt-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -157,7 +158,7 @@ const ProductDetailManager = () => {
         <div className="space-x-2">
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
             disabled={loading}
           >
             {loading ? (editMode ? "Updating..." : "Saving...") : editMode ? "Update Product Detail" : "Save Product Detail"}
@@ -166,7 +167,7 @@ const ProductDetailManager = () => {
             <button
               type="button"
               onClick={handleCancelEdit}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition duration-300"
             >
               Cancel Edit
             </button>
@@ -174,13 +175,13 @@ const ProductDetailManager = () => {
         </div>
       </form>
 
-      <table className="min-w-full bg-white">
-        <thead>
+      <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+        <thead className="bg-gray-200">
           <tr>
-            <th className="py-2 px-4 border-b">Product</th>
-            <th className="py-2 px-4 border-b">Quantity</th>
-            <th className="py-2 px-4 border-b">Price</th>
-            <th className="py-2 px-4 border-b">Actions</th>
+            <th className="py-2 px-4 border-b text-left">Product</th>
+            <th className="py-2 px-4 border-b text-left">Quantity</th>
+            <th className="py-2 px-4 border-b text-left">Price</th>
+            <th className="py-2 px-4 border-b text-left">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -190,24 +191,24 @@ const ProductDetailManager = () => {
             </tr>
           ) : (
             productDetails.map((detail) => {
-              const prod = product.find(p => p.productId === detail.product?.productId); // Changed products to product
+              const prod = product.find(p => p.productId === detail.product?.productId);
               return (
-                <tr key={detail.productDetailId}>
+                <tr key={detail.productDetailId} className="hover:bg-gray-100">
                   <td className="py-2 px-4 border-b">{prod ? prod.productName : "Unknown Product"}</td>
                   <td className="py-2 px-4 border-b">{detail.quantity}</td>
                   <td className="py-2 px-4 border-b">{detail.price}</td>
-                  <td className="py-2 px-4 border-b space-x-2">
+                  <td className="py-2 px-4 border-b flex space-x-2">
                     <button
                       onClick={() => handleEdit(detail)}
-                      className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-700"
+                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-700 flex items-center space-x-1"
                     >
-                      Edit
+                      <FaEdit /> <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDelete(detail.productDetailId)}
-                      className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700 flex items-center space-x-1"
                     >
-                      Delete
+                      <FaTrash /> <span>Delete</span>
                     </button>
                   </td>
                 </tr>

@@ -4,7 +4,7 @@ import ProductService from "../../service/ProductService";
 
 const ProductDetailManager = () => {
   const [productDetails, setProductDetails] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [product, setProduct] = useState([]); // Changed products to product
   const [formData, setFormData] = useState({ productId: "", quantity: 0, price: 0 });
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -13,7 +13,7 @@ const ProductDetailManager = () => {
 
   useEffect(() => {
     loadProductDetails();
-    loadProducts();
+    loadProduct(); // Changed loadProducts to loadProduct
   }, []);
 
   const loadProductDetails = async () => {
@@ -31,12 +31,12 @@ const ProductDetailManager = () => {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProduct = async () => { // Changed function name
     setErrorMessage("");
     try {
       const response = await ProductService.getAllProducts();
       console.log("Fetched Products:", response); // Log response
-      setProducts(response.data); // Ensure response.data contains the product list
+      setProduct(response.data); // Ensure response.data contains the product list
     } catch (error) {
       console.error("Error loading products", error);
       setErrorMessage("Không thể tải danh sách sản phẩm.");
@@ -55,14 +55,14 @@ const ProductDetailManager = () => {
     try {
       if (editMode) {
         await ProductDetailService.updateProductDetail(editId, {
-          products: { productId: formData.productId },
+          product: { productId: formData.productId },
           quantity: formData.quantity,
           price: formData.price,
         });
         setEditMode(false);
       } else {
         await ProductDetailService.createProductDetail({
-          products: { productId: formData.productId },
+          product: { productId: formData.productId }, // Ensure productId is included
           quantity: formData.quantity,
           price: formData.price,
         });
@@ -72,8 +72,9 @@ const ProductDetailManager = () => {
     } catch (error) {
       console.error("Error saving product detail", error);
       setErrorMessage("Có lỗi khi lưu thông tin chi tiết sản phẩm.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async (id) => {
@@ -89,18 +90,13 @@ const ProductDetailManager = () => {
   };
 
   const handleEdit = (detail) => {
-    if (detail.products) { // Check if products exists
-      setFormData({
-        productId: detail.products.productId || "", // Ensure productId is defined
-        quantity: detail.quantity || 0, // Ensure quantity is defined
-        price: detail.price || 0, // Ensure price is defined
-      });
-      setEditId(detail.productDetailId);
-      setEditMode(true);
-    } else {
-      console.error("Invalid product detail:", detail); // Log the invalid detail for debugging
-      setErrorMessage("Chi tiết sản phẩm không hợp lệ.");
-    }
+    setFormData({
+      productId: detail.product.productId || "", // Ensure productId is defined
+      quantity: detail.quantity || 0, // Ensure quantity is defined
+      price: detail.price || 0, // Ensure price is defined
+    });
+    setEditId(detail.productDetailId); // Set the editId to the selected productDetailId
+    setEditMode(true);
   };
 
   const handleCancelEdit = () => {
@@ -126,9 +122,9 @@ const ProductDetailManager = () => {
             required
           >
             <option value="">Select a product</option>
-            {products.map((product) => (
-              <option key={product.productId} value={product.productId}>
-                {product.productName}
+            {product.map((prod) => ( // Changed products to product
+              <option key={prod.productId} value={prod.productId}>
+                {prod.productName}
               </option>
             ))}
           </select>
@@ -194,10 +190,10 @@ const ProductDetailManager = () => {
             </tr>
           ) : (
             productDetails.map((detail) => {
-              const product = products.find(p => p.productId === detail.products?.productId); 
+              const prod = product.find(p => p.productId === detail.product?.productId); // Changed products to product
               return (
                 <tr key={detail.productDetailId}>
-                  <td className="py-2 px-4 border-b">{product ? product.productName : "Unknown Product"}</td>
+                  <td className="py-2 px-4 border-b">{prod ? prod.productName : "Unknown Product"}</td>
                   <td className="py-2 px-4 border-b">{detail.quantity}</td>
                   <td className="py-2 px-4 border-b">{detail.price}</td>
                   <td className="py-2 px-4 border-b space-x-2">

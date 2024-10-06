@@ -99,7 +99,7 @@ const ProductCategoriesTable = () => {
             categories.map((category) => (
               <tr key={category.productCategogyId}> {/* Use productCategogyId */}
                 <td className="border border-gray-200 p-2">{category.productCategogyId}</td> {/* Use productCategogyId */}
-                <td className="border border-gray-200 p-2">{category.productName || 'Unknown Category'}</td> {/* Use categogyName */}
+                <td className="border border-gray-200 p-2">{category.categogyName || 'Unknown Category'}</td> {/* Use categogyName */}
                 <td className="border border-gray-200 p-2">
                   <button onClick={() => handleEdit(category)} className="bg-yellow-500 text-white rounded px-2 py-1">
                     Chỉnh sửa

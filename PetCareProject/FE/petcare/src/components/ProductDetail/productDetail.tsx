@@ -1,218 +1,152 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Header from "../header/Header";
-import ProductService from "../../service/ProductService";
+import { useParams } from "react-router-dom";
 import ProductDetailService from "../../service/ProductDetailService";
-import ProductColorsService from "../../service/ProductColorsService";
-import ProductSizesService from "../../service/ProductSizesService";
-import toastr from "toastr"; // Nhập Toastr
-import "toastr/build/toastr.min.css"; // Nhập CSS của Toastr
+import Header from "../header/Header";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
-export default function ProductDetail() {
-    const { id } = useParams();
-    const [product, setProduct] = useState(null);
+const ProductDetail = () => {
+    const { id: productId } = useParams(); // 'id' is the productId
     const [productDetail, setProductDetail] = useState(null);
-    const [colors, setColors] = useState([]);
-    const [sizes, setSizes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [quantityError, setQuantityError] = useState(null);
-    const [selectedQuantity, setSelectedQuantity] = useState(1);
-    const navigate = useNavigate();
+    const [quantity, setQuantity] = useState(1); // Default quantity
+    const [stockAvailable, setStockAvailable] = useState(0); // Available stock
 
     useEffect(() => {
-        const fetchProductData = async () => {
-            if (!id) {
-                setError("ID sản phẩm không xác định");
-                setLoading(false);
-                return;
-            }
-    
+        const fetchProductDetail = async () => {
+            setLoading(true); // Start loading before the fetch
             try {
-                const productResponse = await ProductService.getProductById(id);
-                console.log("Dữ liệu sản phẩm:", productResponse.data);
-                setProduct(productResponse.data);
-    
-                const productDetailResponse = await ProductDetailService.getProductDetailById(id);
-                console.log("Dữ liệu chi tiết sản phẩm:", productDetailResponse);
-                setProductDetail(productDetailResponse);
-    
-                const colorsResponse = await ProductColorsService.getColorsByProductId(id);
-                console.log("Dữ liệu màu sắc:", colorsResponse.data);
-                setColors(colorsResponse.data);
-    
-                const sizesResponse = await ProductSizesService.getSizesByProductId(id);
-                console.log("Dữ liệu kích thước:", sizesResponse.data);
-                setSizes(sizesResponse.data);
+                const response = await ProductDetailService.getProductDetailsByProductId(productId);
+                if (!response) {
+                    throw new Error("Không tìm thấy sản phẩm");
+                }
+                setProductDetail(response);
+                setStockAvailable(response.quantity); // Set available stock
             } catch (error) {
-                console.error("Lỗi khi lấy thông tin sản phẩm:", error.message);
-                setError("Không thể lấy thông tin sản phẩm.");
+                console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+                const errorMessage = error.message || "Lỗi khi lấy thông tin sản phẩm. Vui lòng thử lại sau.";
+                setError(errorMessage);
+                toastr.error(errorMessage);
             } finally {
-                setLoading(false);
+                setLoading(false); // Stop loading after the fetch
             }
         };
-        console.log("ID sản phẩm:", id);
-        
-        fetchProductData();
-    }, [id]);
-    
 
-    // Thiết lập tùy chọn cho Toastr
-    useEffect(() => {
-        toastr.options = {
-            closeButton: true,
-            debug: false,
-            newestOnTop: false,
-            progressBar: true,
-            positionClass: "toast-top-right-custom",
-            preventDuplicates: false,
-            onclick: null,
-            showDuration: "300",
-            hideDuration: "1000",
-            timeOut: "2000",
-            extendedTimeOut: "1000",
-            showEasing: "swing",
-            hideEasing: "linear",
-            showMethod: "fadeIn",
-            hideMethod: "fadeOut"
-        };
-    }, []); // Chỉ chạy một lần khi component mount
+        fetchProductDetail();
+    }, [productId]);
 
-
+    // Loading state
     if (loading) {
         return <div className="text-center py-10 text-lg">Đang tải...</div>;
     }
 
-    if (!product || !productDetail) {
-        return <div className="text-center py-10 text-lg text-red-600">Không tìm thấy sản phẩm!</div>;
+    // Error state
+    if (error) {
+        return <div className="text-center py-10 text-lg text-red-600">{error}</div>;
     }
 
-    const { productName, image, productId, productQuantity, category, brand } = product;
-    const { price } = productDetail;
+    // Check if productDetail is valid
+    if (!productDetail) {
+        return <div className="text-center py-10 text-lg text-red-600">Không tìm thấy sản phẩm.</div>;
+    }
 
-    const handleGoBack = () => {
-        navigate(-1);
-    };
+    // Destructure the necessary fields from productDetail
+    const { product, price } = productDetail;
 
     const handleQuantityChange = (e) => {
-        const value = parseInt(e.target.value);
-
-        if (value > productQuantity) {
-            setQuantityError(`Số lượng tối đa có sẵn là ${productQuantity}`);
-            setSelectedQuantity(productQuantity);
-        } else if (value < 1) {
-            setQuantityError("Số lượng không thể nhỏ hơn 1");
-            setSelectedQuantity(1);
-        } else {
-            setQuantityError(null);
-            setSelectedQuantity(value);
-        }
+        const value = Math.max(1, parseInt(e.target.value)); // Ensure quantity is at least 1
+        setQuantity(value);
     };
 
-    // Hàm thêm sản phẩm vào giỏ hàng
     const handleAddToCart = () => {
-        const cartItem = {
-            productId: product.productId,
-            productName: product.productName,
-            image: product.image,
-            price: productDetail.price,
-            quantity: selectedQuantity,
-        };
-
-        const currentCart = JSON.parse(localStorage.getItem("cartItems")) || [];
-        const existingItemIndex = currentCart.findIndex(item => item.productId === cartItem.productId);
-
-        if (existingItemIndex > -1) {
-            currentCart[existingItemIndex].quantity += cartItem.quantity;
-        } else {
-            currentCart.push(cartItem);
+        if (quantity > stockAvailable) {
+            toastr.error(`Bạn chỉ có thể thêm tối đa ${stockAvailable} ${product.productName}.`);
+            return; // Prevent adding to cart if quantity exceeds stock
         }
+        // Logic to add product to cart
+        console.log(`Thêm ${quantity} ${product.productName} vào giỏ hàng.`);
+        toastr.success(`${quantity} ${product.productName} đã được thêm vào giỏ hàng.`);
+    };
 
-        localStorage.setItem("cartItems", JSON.stringify(currentCart));
-
-        // Hiện thông báo thành công bằng Toastr
-        toastr.success("Sản phẩm đã được thêm vào giỏ hàng!", "Thành công");
+    const handleCheckout = () => {
+        if (quantity > stockAvailable) {
+            toastr.error(`Bạn chỉ có thể thanh toán với tối đa ${stockAvailable} ${product.productName}.`);
+            return; // Prevent proceeding to checkout if quantity exceeds stock
+        }
+        // Logic for proceeding to checkout
+        console.log("Tiến hành thanh toán.");
+        toastr.info("Tiến hành thanh toán.");
     };
 
     return (
         <>
             <Header />
-            <div style={{ marginTop: '20px' }}>
-                {/* Nội dung khác của component */}
-            </div>
-            <div className="p-6 mt-4 max-w-7xl mx-auto bg-gray-50 rounded-lg shadow-lg">
-                <button
-                    onClick={handleGoBack}
-                    className="mb-4 text-blue-500 hover:text-blue-700 transition duration-200"
-                >
-                    &larr; Quay lại sản phẩm
-                </button>
-                <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 bg-white shadow-lg rounded-lg p-8">
-                    <div className="lg:w-1/3 relative hover:scale-105 transition-transform duration-300 ease-in-out">
+            <div className="container mx-auto my-5 p-4 bg-white shadow-lg rounded-lg">
+                <div className="flex flex-col lg:flex-row">
+                    <div className="lg:w-1/2 flex justify-center">
                         <img
-                            src={image ? image : 'default_image_url.jpg'}
-                            alt={productName}
-                            className="w-full h-auto object-cover rounded-lg border border-gray-200 shadow-md"
+                            src={product?.imageUrl || 'default_image_url.jpg'}
+                            alt={product?.productName || 'Sản phẩm'}
+                            className="rounded-lg w-48 h-auto object-cover shadow-lg" // Reduced size
                         />
                     </div>
-                    <div className="flex-1 lg:pl-10">
-                        <h1 className="text-4xl font-bold mb-4 text-gray-900">{productName}</h1>
-                        <p className="text-red-600 text-4xl font-semibold mb-6">{price}₫</p>
+                    <div className="lg:w-1/2 lg:pl-4 mt-6 lg:mt-0">
+                        <h1 className="text-2xl font-bold text-gray-800">{product?.productName || 'Tên sản phẩm'}</h1>
+                        <p className="text-red-500 text-xl mt-2">{price}₫</p>
+                      
 
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="flex items-center gap-2">
-                                <span className="text-lg font-medium">Số lượng</span>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={selectedQuantity}
-                                    onChange={handleQuantityChange}
-                                    className="border border-gray-300 rounded-lg w-20 p-2 text-center shadow-sm"
-                                />
-                            </div>
-
-                            {quantityError && (
-                                <p className="text-red-500 text-sm mt-1">{quantityError}</p>
+                        {/* Quantity Input */}
+                        <div className="mt-4 flex items-center">
+                            <label htmlFor="quantity" className="block text-lg font-medium">Số lượng:</label>
+                            <input
+                                id="quantity"
+                                type="number"
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                                className="mt-1 block w-20 border border-gray-300 rounded-md p-2"
+                                min="1"
+                                max={stockAvailable} // Limit input to max available stock
+                            />
+                            {quantity > stockAvailable && (
+                                <p className="text-red-500 mt-2">Bạn chỉ có thể thêm tối đa {stockAvailable} sản phẩm.</p>
                             )}
+                        </div>
+                        
 
+                        <p className="mt-3 font-bold text-lg">Mô tả: {product?.description || 'Không có mô tả'}</p>
+
+
+                        {/* Buttons for adding to cart and checkout */}
+                        <div className="mt-4 flex space-x-2">
                             <button
                                 onClick={handleAddToCart}
-                                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
+                                className="bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600 transition duration-300"
                             >
-                                Thêm vào giỏ hàng
+                                Thêm vào giỏ
                             </button>
-                            <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300">
+                            <button
+                                onClick={handleCheckout}
+                                className="bg-green-500 text-white font-semibold py-2 px-3 rounded-lg hover:bg-green-600 transition duration-300"
+                            >
                                 Thanh toán
                             </button>
                         </div>
 
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Màu sắc và kích thước có sẵn</h2>
-                            <div className="space-y-2">
-                                <p><strong>Màu sắc:</strong> {colors.length ? colors.map(color => color.colorName).join(', ') : 'N/A'}</p>
-                                <p><strong>Kích thước:</strong> {sizes.length ? sizes.map(size => size.sizeName).join(', ') : 'N/A'}</p>
-                            </div>
-                        </div>
-
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Chi tiết sản phẩm</h2>
-                            <div className="space-y-2">
-                                <p><strong>Mã sản phẩm:</strong> {productId}</p>
-                                <p><strong>Số lượng có sẵn:</strong> {productQuantity}</p>
-                                <p><strong>Danh mục:</strong> {category ? category.categoryName : "N/A"}</p>
-                                <p><strong>Thương hiệu:</strong> {brand ? brand.brand_name : "N/A"}</p>
-                            </div>
-                        </div>
-
-                        <div className="bg-blue-50 text-blue-700 p-6 rounded-lg shadow-md mb-4">
-                            <p className="font-semibold">
-                                Đăng ký nhận{" "}
-                                <span className="text-blue-800">Voucher</span> cho dịch vụ spa miễn phí cho thú cưng của bạn!
-                            </p>
-                        </div>
+                        {/* Additional product details */}
+                        {/* <div className="mt-6">
+                            <h2 className="text-lg font-semibold">Chi tiết sản phẩm</h2>
+                            <ul className="list-disc ml-6 mt-2">
+                                <li><strong>Thể loại:</strong> {product?.category?.categoryName || 'N/A'}</li>
+                                <li><strong>Thương hiệu:</strong> {product?.brand?.brandName || 'N/A'}</li>
+                                <li><strong>Đánh giá:</strong> {product?.rating || 0}</li>
+                            </ul>
+                        </div> */}
                     </div>
                 </div>
             </div>
         </>
     );
-}
+};
+
+export default ProductDetail;

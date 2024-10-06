@@ -11,9 +11,10 @@ const ProductTable = () => {
   const [productDetails, setProductDetails] = useState({
     productName: '',
     productQuantity: '',
-    image: '',
-    brand: { brand_id: null },
-    category: { id: null },
+    description: '', // Added description to match the model
+    imageUrl: '', // Changed to imageUrl to match the model
+    brand: { brandId: null },
+    category: { productCategogyId: null },
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,8 +72,8 @@ const ProductTable = () => {
     try {
       const detailsToSend = {
         ...productDetails,
-        brand: { brand_id: productDetails.brand.brand_id },
-        category: { id: productDetails.category.id },
+        brand: { brandId: productDetails.brand.brandId },
+        category: { productCategogyId: productDetails.category.productCategogyId },
       };
 
       if (productId) {
@@ -82,7 +83,7 @@ const ProductTable = () => {
       }
       fetchProducts();
       resetForm();
-      setFormErrors({}); // Reset form errors after successful submission
+      setFormErrors({});
     } catch (err) {
       setError('Failed to save product: ' + (err.response?.data?.message || err.message));
     }
@@ -91,10 +92,10 @@ const ProductTable = () => {
   const validateForm = () => {
     const errors = {};
     if (!productDetails.productName) {
-      errors.productName = 'Product Name is required.';
+      errors.productName = 'Tên sản phẩm là bắt buộc.';
     }
     if (!productDetails.productQuantity) {
-      errors.productQuantity = 'Product Quantity is required.';
+      errors.productQuantity = 'Số lượng sản phẩm là bắt buộc.';
     }
     return errors;
   };
@@ -104,9 +105,10 @@ const ProductTable = () => {
     setProductDetails({
       productName: product.productName,
       productQuantity: product.productQuantity,
-      image: product.image,
-      brand: { brand_id: product.brand?.brand_id || null },
-      category: { id: product.category?.id || null },
+      description: product.description, // Added description for editing
+      imageUrl: product.imageUrl, // Changed to imageUrl
+      brand: { brandId: product.brand?.brandId || null },
+      category: { productCategogyId: product.category?.productCategogyId || null },
     });
   };
 
@@ -115,11 +117,12 @@ const ProductTable = () => {
     setProductDetails({
       productName: '',
       productQuantity: '',
-      image: '',
-      brand: { brand_id: null },
-      category: { id: null },
+      description: '', // Reset description
+      imageUrl: '', // Reset imageUrl
+      brand: { brandId: null },
+      category: { productCategogyId: null },
     });
-    setFormErrors({}); // Clear errors on form reset
+    setFormErrors({});
   };
 
   const handleDelete = async (id) => {
@@ -132,29 +135,29 @@ const ProductTable = () => {
   };
 
   const getBrandName = (brandId) => {
-    const brand = brands.find((b) => b.brand_id === brandId);
-    return brand ? brand.brand_name : 'N/A';
+    const brand = brands.find((b) => b.brandId === brandId);
+    return brand ? brand.brandName : 'N/A';
   };
 
-  const getCategoryName = (categoryId) => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category ? category.categoryName : 'N/A';
+  const getCategoryName = (productCategogyId) => {
+    const category = categories.find((c) => c.productCategogyId === productCategogyId);
+    return category ? category.categogyName : 'N/A';
   };
 
   if (loading) {
-    return <div>Loading products...</div>;
+    return <div>Đang tải sản phẩm...</div>;
   }
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold text-center mb-6">Product Management</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Quản lý sản phẩm</h1>
       {error && <div className="text-red-600 mb-4 text-center">{error}</div>}
 
       <div className="mb-6 grid grid-cols-2 gap-6">
         <div>
           <input
             type="text"
-            placeholder="Product Name"
+            placeholder="Tên sản phẩm"
             value={productDetails.productName}
             onChange={(e) => setProductDetails({ ...productDetails, productName: e.target.value })}
             className={`border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 ${formErrors.productName ? 'border-red-500' : 'border-gray-300'}`}
@@ -165,7 +168,7 @@ const ProductTable = () => {
         <div>
           <input
             type="number"
-            placeholder="Quantity"
+            placeholder="Số lượng"
             value={productDetails.productQuantity}
             onChange={(e) => setProductDetails({ ...productDetails, productQuantity: e.target.value })}
             className={`border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 ${formErrors.productQuantity ? 'border-red-500' : 'border-gray-300'}`}
@@ -176,23 +179,33 @@ const ProductTable = () => {
         <div>
           <input
             type="text"
-            placeholder="Image URL"
-            value={productDetails.image}
-            onChange={(e) => setProductDetails({ ...productDetails, image: e.target.value })}
+            placeholder="Đường dẫn ảnh"
+            value={productDetails.imageUrl} // Changed to imageUrl
+            onChange={(e) => setProductDetails({ ...productDetails, imageUrl: e.target.value })}
+            className="border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Mô tả"
+            value={productDetails.description} // Added input for description
+            onChange={(e) => setProductDetails({ ...productDetails, description: e.target.value })}
             className="border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
 
         <div>
           <select
-            value={productDetails.brand.brand_id || ''}
-            onChange={(e) => setProductDetails({ ...productDetails, brand: { brand_id: e.target.value } })}
+            value={productDetails.brand.brandId || ''}
+            onChange={(e) => setProductDetails({ ...productDetails, brand: { brandId: e.target.value } })}
             className="border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            <option value="">Select Brand</option>
+            <option value="">Chọn thương hiệu</option>
             {brands.map((brand) => (
-              <option key={brand.brand_id} value={brand.brand_id}>
-                {brand.brand_name}
+              <option key={brand.brandId} value={brand.brandId}>
+                {brand.brandName}
               </option>
             ))}
           </select>
@@ -200,14 +213,14 @@ const ProductTable = () => {
 
         <div>
           <select
-            value={productDetails.category.id || ''}
-            onChange={(e) => setProductDetails({ ...productDetails, category: { id: e.target.value } })}
+            value={productDetails.category.productCategogyId || ''}
+            onChange={(e) => setProductDetails({ ...productDetails, category: { productCategogyId: e.target.value } })}
             className="border rounded p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            <option value="">Select Category</option>
+            <option value="">Chọn loại sản phẩm</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.categoryName}
+              <option key={category.productCategogyId} value={category.productCategogyId}>
+                {category.categogyName}
               </option>
             ))}
           </select>
@@ -218,14 +231,14 @@ const ProductTable = () => {
             onClick={handleCreateOrUpdate}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded px-6 py-3 transition-all"
           >
-            {productId ? 'Update Product' : 'Add Product'}
+            {productId ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm'}
           </button>
 
           <button
             onClick={resetForm}
             className="bg-gray-500 hover:bg-gray-600 text-white rounded px-6 py-3 transition-all"
           >
-            Reset
+            Đặt lại
           </button>
         </div>
       </div>
@@ -234,47 +247,33 @@ const ProductTable = () => {
         <thead>
           <tr className="bg-gray-100">
             <th className="border p-3 text-left">ID</th>
-            <th className="border p-3 text-left">Product Name</th>
-            <th className="border p-3 text-left">Quantity</th>
-            <th className="border p-3 text-left">Image</th>
-            <th className="border p-3 text-left">Brand</th>
-            <th className="border p-3 text-left">Category</th>
-            <th className="border p-3 text-left">Actions</th>
+            <th className="border p-3 text-left">Tên sản phẩm</th>
+            <th className="border p-3 text-left">Số lượng</th>
+            <th className="border p-3 text-left">Hình ảnh</th>
+            <th className="border p-3 text-left">Mô tả</th> {/* Added description column */}
+            <th className="border p-3 text-left">Thương hiệu</th>
+            <th className="border p-3 text-left">Loại sản phẩm</th>
+            <th className="border p-3 text-left">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {products.length > 0 ? products.map((product) => (
-            <tr key={product.productId} className="hover:bg-gray-50">
+          {products.map((product) => (
+            <tr key={product.productId}>
               <td className="border p-3">{product.productId}</td>
               <td className="border p-3">{product.productName}</td>
               <td className="border p-3">{product.productQuantity}</td>
               <td className="border p-3">
-                <img src={product.image} alt={product.productName} className="h-10 w-10 object-cover rounded" />
+                <img src={product.imageUrl} alt={product.productName} className="w-20 h-20 object-cover" /> {/* Displaying product image */}
               </td>
-              <td className="border p-3">{getBrandName(product.brand?.brand_id)}</td>
-              <td className="border p-3">{getCategoryName(product.category?.id)}</td>
-              <td className="border p-3 space-x-4">
-                <button
-                  onClick={() => handleEdit(product)}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-white rounded px-4 py-2 transition-all"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product.productId)}
-                  className="bg-red-500 hover:bg-red-600 text-white rounded px-4 py-2 transition-all"
-                >
-                  Delete
-                </button>
+              <td className="border p-3">{product.description}</td> {/* Displaying product description */}
+              <td className="border p-3">{getBrandName(product.brand?.brandId)}</td>
+              <td className="border p-3">{getCategoryName(product.category?.productCategogyId)}</td>
+              <td className="border p-3">
+                <button onClick={() => handleEdit(product)} className="bg-yellow-500 hover:bg-yellow-600 text-white rounded px-4 py-2 mr-2">Chỉnh sửa</button>
+                <button onClick={() => handleDelete(product.productId)} className="bg-red-500 hover:bg-red-600 text-white rounded px-4 py-2">Xóa</button>
               </td>
             </tr>
-          )) : (
-            <tr>
-              <td colSpan="7" className="border p-3 text-center">
-                No products found.
-              </td>
-            </tr>
-          )}
+          ))}
         </tbody>
       </table>
     </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ProductCategoriesService from '../../service/ProductCategoriesService';
+import { FaEdit, FaTrash } from 'react-icons/fa'; // Importing icons
 
 const ProductCategoriesTable = () => {
   const [categories, setCategories] = useState([]);
@@ -16,7 +17,7 @@ const ProductCategoriesTable = () => {
     try {
       setLoading(true);
       const response = await ProductCategoriesService.getAllProductCategories();
-      setCategories(response.data); // Ensure the structure of response is correct
+      setCategories(response.data);
     } catch (err) {
       setError('Không thể lấy danh sách danh mục: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -26,7 +27,7 @@ const ProductCategoriesTable = () => {
 
   const handleAddOrUpdate = async () => {
     try {
-      const categoryData = { categogyName: categoryName }; // Adjust field name accordingly
+      const categoryData = { categogyName: categoryName };
       if (categoryId) {
         await ProductCategoriesService.updateProductCategory(categoryId, categoryData);
       } else {
@@ -40,8 +41,8 @@ const ProductCategoriesTable = () => {
   };
 
   const handleEdit = (category) => {
-    setCategoryId(category.productCategogyId); // Use productCategogyId here
-    setCategoryName(category.categogyName); // Use categogyName for the name
+    setCategoryId(category.productCategogyId);
+    setCategoryName(category.categogyName);
   };
 
   const handleDelete = async (id) => {
@@ -70,24 +71,24 @@ const ProductCategoriesTable = () => {
       <h1 className="text-2xl font-bold mb-4">Quản lý Danh mục Sản phẩm</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center space-x-2">
         <input
           type="text"
           placeholder="Tên Danh mục"
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
-          className="border rounded p-2 w-1/4"
+          className="border rounded p-2 w-1/4 focus:ring-2 focus:ring-blue-400"
         />
-        <button onClick={handleAddOrUpdate} className="bg-blue-500 text-white rounded px-4 py-2 ml-2">
+        <button onClick={handleAddOrUpdate} className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-700 transition">
           {categoryId ? 'Cập nhật Danh mục' : 'Thêm Danh mục'}
         </button>
-        <button onClick={resetForm} className="bg-gray-500 text-white rounded px-4 py-2 ml-2">
+        <button onClick={resetForm} className="bg-gray-500 text-white rounded px-4 py-2 hover:bg-gray-700 transition">
           Đặt lại
         </button>
       </div>
 
-      <table className="min-w-full border-collapse border border-gray-200">
-        <thead>
+      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md a text-center">
+        <thead className="bg-gray-100">
           <tr>
             <th className="border border-gray-200 p-2">ID</th>
             <th className="border border-gray-200 p-2">Tên Danh mục</th>
@@ -97,15 +98,15 @@ const ProductCategoriesTable = () => {
         <tbody>
           {categories.length > 0 ? (
             categories.map((category) => (
-              <tr key={category.productCategogyId}> {/* Use productCategogyId */}
-                <td className="border border-gray-200 p-2">{category.productCategogyId}</td> {/* Use productCategogyId */}
-                <td className="border border-gray-200 p-2">{category.categogyName || 'Unknown Category'}</td> {/* Use categogyName */}
-                <td className="border border-gray-200 p-2">
-                  <button onClick={() => handleEdit(category)} className="bg-yellow-500 text-white rounded px-2 py-1">
-                    Chỉnh sửa
+              <tr key={category.productCategogyId} className="hover:bg-gray-50">
+                <td className="border border-gray-200 p-2">{category.productCategogyId}</td>
+                <td className="border border-gray-200 p-2">{category.categogyName || 'Unknown Category'}</td>
+                <td className="border border-gray-200 p-2 flex">
+                  <button onClick={() => handleEdit(category)} className="bg-yellow-500 text-white rounded px-2 py-1 flex items-center space-x-1 hover:bg-yellow-600 transition">
+                    <FaEdit /> <span>Chỉnh sửa</span>
                   </button>
-                  <button onClick={() => handleDelete(category.productCategogyId)} className="bg-red-500 text-white rounded px-2 py-1 ml-2">
-                    Xóa
+                  <button onClick={() => handleDelete(category.productCategogyId)} className="bg-red-500 text-white rounded px-2 py-1 ml-2 flex items-center space-x-1 hover:bg-red-600 transition">
+                    <FaTrash /> <span>Xóa</span>
                   </button>
                 </td>
               </tr>

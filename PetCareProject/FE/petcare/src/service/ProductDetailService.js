@@ -1,9 +1,6 @@
-// ProductDetailService.js
-
 const BASE_URL = "http://localhost:8080/api/product-details";
 
 const ProductDetailService = {
-  
   // Fetch all ProductDetails
   getAllProductDetails: async () => {
     try {
@@ -13,27 +10,27 @@ const ProductDetailService = {
       }
       return await response.json();
     } catch (error) {
-      console.error(error);
-      throw error;
+      console.error("Error fetching product details:", error);
+      throw error; // Re-throw the error to handle it later
     }
   },
 
   // Fetch ProductDetail by ID
   getProductDetailById: async (id) => {
     try {
-      const response = await fetch(`${BASE_URL}/${id}`); // Gọi API với ID
+      const response = await fetch(`${BASE_URL}/${id}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch product detail with ID ${id}`);
       }
       return await response.json();
     } catch (error) {
-      console.error(error);
+      console.error(`Error fetching product detail with ID ${id}:`, error);
       throw error;
     }
   },
 
-  // Create or update ProductDetail
-  saveProductDetail: async (productDetail) => {
+  // Create ProductDetail
+  createProductDetail: async (productDetail) => {
     try {
       const response = await fetch(BASE_URL, {
         method: "POST",
@@ -43,11 +40,31 @@ const ProductDetailService = {
         body: JSON.stringify(productDetail),
       });
       if (!response.ok) {
-        throw new Error("Failed to save product detail");
+        throw new Error("Failed to create product detail");
       }
       return await response.json();
     } catch (error) {
-      console.error(error);
+      console.error("Error creating product detail:", error);
+      throw error;
+    }
+  },
+
+  // Update ProductDetail
+  updateProductDetail: async (id, productDetail) => {
+    try {
+      const response = await fetch(`${BASE_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productDetail),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update product detail with ID ${id}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Error updating product detail with ID ${id}:`, error);
       throw error;
     }
   },
@@ -62,7 +79,7 @@ const ProductDetailService = {
         throw new Error(`Failed to delete product detail with ID ${id}`);
       }
     } catch (error) {
-      console.error(error);
+      console.error(`Error deleting product detail with ID ${id}:`, error);
       throw error;
     }
   },
@@ -76,7 +93,7 @@ const ProductDetailService = {
       }
       return await response.json();
     } catch (error) {
-      console.error(error);
+      console.error(`Error fetching product details for cart ID ${cartDetailsId}:`, error);
       throw error;
     }
   },
@@ -84,7 +101,7 @@ const ProductDetailService = {
   // Fetch ProductDetails by Product ID
   getProductDetailsByProductId: async (productId) => {
     try {
-      const response = await fetch(`${BASE_URL}/product/${productId}`);
+      const response = await fetch(`${BASE_URL}/by-product/${productId}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch product details for product ID ${productId}`);
       }
@@ -94,6 +111,9 @@ const ProductDetailService = {
       throw error;
     }
   },
+
+
+
 };
 
 export default ProductDetailService;

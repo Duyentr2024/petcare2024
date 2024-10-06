@@ -46,14 +46,7 @@ function App() {
           }
         />
         
-        <Route
-          path="/productdetail"
-          element={
-            <ProtectedRoute>
-              <ProductDetail />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/product/:id" element={<ProductDetail />} /> {/* Ensure this route matches */}
         <Route
           path="/manageproduct"
           element={

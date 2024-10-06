@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Slider from "react-slick";
 import ProductItem from "./ProductItem";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ArrowForwardIosOutlinedIcon from "@mui/icons-material/ArrowForwardIosOutlined";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
-import ProductService from "../../service/ProductService"; // Adjust the import path as necessary
+import ProductService from "../../service/ProductService";
 import { Link } from "react-router-dom";
 
 export default function CatProduct() {
   const [products, setProducts] = useState([]);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await ProductService.getAllProducts();
-        // Adjust the mapping based on the data structure returned by your API
+        console.log(response.data); // Verify the API response structure
         const formattedProducts = response.data.map((product) => ({
           id: product.productId,
           name: product.productName,
-          price: `${product.productQuantity}đ`, // Assuming you want to show the quantity as price
-          image: product.image,
-          rating: product.rating || 0, // Set a default rating if not available
+          quantity: product.productQuantity,
+          image: product.imageUrl || 'default_image_url.jpg', // Fallback for image
+          rating: product.rating || 0,
         }));
         setProducts(formattedProducts);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Lỗi khi lấy sản phẩm:", error);
       }
     };
 
@@ -62,26 +63,26 @@ export default function CatProduct() {
     ],
   };
 
-  const sliderRef = React.useRef(null);
   const next = () => {
     sliderRef.current.slickNext();
   };
+
   const prev = () => {
     sliderRef.current.slickPrev();
   };
 
   return (
     <>
-      <span className="block mx-32 text-3xl py-4 font-semibold">
+      <h2 className="block mx-32 text-3xl py-4 font-semibold">
         Sản phẩm cho mèo
-      </span>
+      </h2>
       <div className="mx-32 mb-10 gap-5 relative">
         <Slider ref={sliderRef} {...settings}>
           {products.map((product) => (
-            <Link to={`/productdetail/${product.id}`} key={product.id}>
+            <Link to={`/product/${product.id}`} key={product.id}>
               <ProductItem
                 name={product.name}
-                price={product.price}
+                quantity={`Số lượng: ${product.quantity}`}
                 image={product.image}
                 rating={product.rating}
               />

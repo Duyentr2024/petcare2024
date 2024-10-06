@@ -21,6 +21,10 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
+                                "/api/brands/**",
+                                "/api/products/**",
+                                "/api/product-details/**",
+                                "/api/product-categories/**",
                                 "/css/**",
                                 "/js/**",
                                 "/"

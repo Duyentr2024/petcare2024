@@ -16,9 +16,9 @@ const ProductCategoriesTable = () => {
     try {
       setLoading(true);
       const response = await ProductCategoriesService.getAllProductCategories();
-      setCategories(response.data);
+      setCategories(response.data); // Ensure the structure of response is correct
     } catch (err) {
-      setError('Failed to fetch categories: ' + (err.response?.data?.message || err.message));
+      setError('Không thể lấy danh sách danh mục: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -26,7 +26,7 @@ const ProductCategoriesTable = () => {
 
   const handleAddOrUpdate = async () => {
     try {
-      const categoryData = { categoryName };
+      const categoryData = { categogyName: categoryName }; // Adjust field name accordingly
       if (categoryId) {
         await ProductCategoriesService.updateProductCategory(categoryId, categoryData);
       } else {
@@ -35,22 +35,22 @@ const ProductCategoriesTable = () => {
       fetchCategories();
       resetForm();
     } catch (err) {
-      setError('Failed to save category: ' + (err.response?.data?.message || err.message));
+      setError('Không thể lưu danh mục: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const handleEdit = (category) => {
-    setCategoryId(category.id);
-    setCategoryName(category.categoryName);
+    setCategoryId(category.productCategogyId); // Use productCategogyId here
+    setCategoryName(category.categogyName); // Use categogyName for the name
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
       try {
         await ProductCategoriesService.deleteProductCategory(id);
         fetchCategories();
       } catch (err) {
-        setError('Failed to delete category: ' + (err.response?.data?.message || err.message));
+        setError('Không thể xóa danh mục: ' + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -62,27 +62,27 @@ const ProductCategoriesTable = () => {
   };
 
   if (loading) {
-    return <div>Loading categories...</div>;
+    return <div>Đang tải danh mục...</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Product Categories Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Quản lý Danh mục Sản phẩm</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Category Name"
+          placeholder="Tên Danh mục"
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
           className="border rounded p-2 w-1/4"
         />
         <button onClick={handleAddOrUpdate} className="bg-blue-500 text-white rounded px-4 py-2 ml-2">
-          {categoryId ? 'Update Category' : 'Add Category'}
+          {categoryId ? 'Cập nhật Danh mục' : 'Thêm Danh mục'}
         </button>
         <button onClick={resetForm} className="bg-gray-500 text-white rounded px-4 py-2 ml-2">
-          Reset
+          Đặt lại
         </button>
       </div>
 
@@ -90,29 +90,29 @@ const ProductCategoriesTable = () => {
         <thead>
           <tr>
             <th className="border border-gray-200 p-2">ID</th>
-            <th className="border border-gray-200 p-2">Category Name</th>
-            <th className="border border-gray-200 p-2">Actions</th>
+            <th className="border border-gray-200 p-2">Tên Danh mục</th>
+            <th className="border border-gray-200 p-2">Hành động</th>
           </tr>
         </thead>
         <tbody>
           {categories.length > 0 ? (
             categories.map((category) => (
-              <tr key={category.id}>
-                <td className="border border-gray-200 p-2">{category.id}</td>
-                <td className="border border-gray-200 p-2">{category.categoryName}</td>
+              <tr key={category.productCategogyId}> {/* Use productCategogyId */}
+                <td className="border border-gray-200 p-2">{category.productCategogyId}</td> {/* Use productCategogyId */}
+                <td className="border border-gray-200 p-2">{category.productName || 'Unknown Category'}</td> {/* Use categogyName */}
                 <td className="border border-gray-200 p-2">
                   <button onClick={() => handleEdit(category)} className="bg-yellow-500 text-white rounded px-2 py-1">
-                    Edit
+                    Chỉnh sửa
                   </button>
-                  <button onClick={() => handleDelete(category.id)} className="bg-red-500 text-white rounded px-2 py-1 ml-2">
-                    Delete
+                  <button onClick={() => handleDelete(category.productCategogyId)} className="bg-red-500 text-white rounded px-2 py-1 ml-2">
+                    Xóa
                   </button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="3" className="border border-gray-200 p-2 text-center">No categories available</td>
+              <td colSpan="3" className="border border-gray-200 p-2 text-center">Không có danh mục nào</td>
             </tr>
           )}
         </tbody>

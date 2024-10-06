@@ -1,12 +1,40 @@
+// BrandService.js
+
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/brands'; // Adjust as necessary
+const API_URL = 'http://localhost:8080/api/brands';
 
-const BrandService = {
-    getAllBrands: () => axios.get(API_URL),
-    createBrand: (brand) => axios.post(API_URL, brand),
-    updateBrand: (brand_id, brand) => axios.put(`${API_URL}/${brand_id}`, brand),
-    deleteBrand: (brand_id) => axios.delete(`${API_URL}/${brand_id}`)
-};
+class BrandService {
+    // Fetch all brands
+    getAllBrands() {
+        return axios.get(API_URL);
+    }
 
-export default BrandService;
+    // Fetch a brand by ID
+    getBrandById(id) {
+        return axios.get(`${API_URL}/${id}`);
+    }
+
+  
+    // Create a new brand
+    createBrand(brand) {
+        return axios.post(API_URL, {
+            brandName: brand.brandName
+        });
+    }
+
+
+    // Update an existing brand
+    updateBrand(id, brand) {
+        return axios.put(`${API_URL}/${id}`, {
+            brandName: brand.brandName
+        });
+    }
+
+    // Delete a brand by ID
+    deleteBrand(id) {
+        return axios.delete(`${API_URL}/${id}`);
+    }
+}
+
+export default new BrandService();
